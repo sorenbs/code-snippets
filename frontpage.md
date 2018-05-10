@@ -15,7 +15,13 @@ const Query = {
 ```js
 const Query = {
   userList: (_, args, context, info) => {
-    return BlackMagic.getData()
+    return mysql.query(
+      `SELECT
+         "user"."id",
+         "user"."name",
+         "user"."isAdmin"
+       FROM tblUsers as "user"`
+    )
   }
 }
 ```
@@ -92,7 +98,16 @@ const Query = {
 ```js
 const Query = {
   searchAdminPosts: (_, args, context, info) => {
-    return BlackMagic.getPosts()
+    return mysql.query(
+      `SELECT
+         "post"."id",
+         "post"."craetedAt",
+         "post"."title"
+       FROM tblPosts AS "post"
+       LEFT JOIN tblUsers AS "user" ON "user"."id" = "post"."authorId"
+       WHERE "user"."isAdmin" = 1
+       ORDER BY DESC "post".id`
+    )
   }
 }
 ```
@@ -163,7 +178,6 @@ const Mutation = {
             connect: { email: args.authorEmail },
           },
         },
-        orderBy: id_DESC,
       },
       info
     )
@@ -174,7 +188,34 @@ const Mutation = {
 ### Without Prisma
 
 ```js
-
+const Query = {
+  searchAdminPosts: (_, args, context, info) => {
+    const postId = mysql.query(
+      `INSERT INTO "tblPosts" ("title", "authorId")
+      VALUES (
+        '${args.title}',
+        (
+          SELECT TOP(1) "id"
+          FROM tblUsers
+          WHERE "tblUsers"."email" = '${args.authorEmail}'
+        )
+      )
+    )
+    
+    return mysql.query(
+      `SELECT
+         "post"."id",
+         "post"."craetedAt",
+         "post"."title",
+         "user"."id",
+         "user"."name",
+         "user"."isAdmin"
+       FROM tblPosts AS "post"
+       LEFT JOIN tblUsers AS "user" ON "user"."id" = "post"."authorId"
+       WHERE "post"."id" = ${postId}
+    )
+  }
+}
 ```
 
 ### Schema
