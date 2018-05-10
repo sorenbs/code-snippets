@@ -56,8 +56,8 @@ type User {
           "isAdmin": true
         },
         {
-          name : "Arnold Anderson",
-          isAdmin: false
+          "name" : "Arnold Anderson",
+          "isAdmin": false
         }
       ]
   }
