@@ -21,3 +21,20 @@ type Post {
   author: User!
 }
 ```
+
+## Application schema
+
+```graphql
+type Query {
+  users(where: UserWhereInput): [User!]!
+  userConnection: UserConnection!
+}
+
+type Mutation {
+  login(email: String!): UserAuthPayload
+  signup(name: String!, email: String!): UserAuthPayload
+  setAdmin(userId: ID!): User
+  writePost(userId: ID!, title: String!): Post
+  updateTitle(id: ID!, newTitle: String!): Post
+}
+```

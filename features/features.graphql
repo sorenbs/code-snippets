@@ -1,0 +1,132 @@
+# basic: query all users
+
+query {
+  users {
+    id
+    name
+    email
+    isAdmin
+  }
+}
+
+# filter: query all users that are not admins and whose emails contain "gmail"
+
+query {
+  users(where: {
+    AND: [
+      { email_contains: "gmail" },
+      { isAdmin: false }
+    ]
+  }) {
+    id
+    name
+    email
+  }
+}
+
+# relational filter: query all users that have at least one post which was created before $date
+
+query($date: DateTime) {
+  users {
+    id
+    name
+    posts(where: {
+      createdAt_gt: $date
+    })
+  }
+}
+
+query {
+  posts {
+    id
+    title
+    author(where: {
+      name_begins_with: "A"
+    }) {
+
+    }
+  }
+}
+
+# pagination: get chunks 10-15 from the users list
+
+query {
+  users(skip: 10, first: 5) {
+    id
+    name
+  }
+}
+
+# aggregation: get the total number of users
+
+query {
+  usersConnection {
+    aggregate {
+      count
+    }
+  }
+}
+
+# sorting: sort the posts by their creation date (descending, i.e. oldest first)
+
+query {
+  posts(orderBy: createAt_DESC) {
+    id
+    createdAt
+    title
+  }
+}
+
+# mutation: create a new user
+
+mutation {
+  createUser(data: {
+    name: "Alice"
+    email: "alice@prisma.io"
+  }) {
+    id
+  }
+}
+
+# nested mutation: create a new user with two posts
+
+mutation {
+  createUser(data: {
+    name: "Bob"
+    email: "bob@prisma.io"
+    posts: {
+      create: [{
+        title: "Subscribe to GraphQL Weekly for the latest GraphQL news"
+      }, {
+        title: "Join us at the GraphQL Europe or GraphQL Day conference"
+      }]
+    }
+  }) {
+    id
+    posts {
+      id
+    }
+  }
+}
+
+# subscription
+
+subscription {
+  post(where: {
+    AND: [{
+      mutation_in: [CREATED],
+      node: {
+        author: {
+          name_begins_with: "A"
+        } 
+      }
+    }]
+  }) {
+    id
+    title
+    author {
+      id
+      name
+    }
+  }
+}
