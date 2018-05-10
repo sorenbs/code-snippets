@@ -50,16 +50,16 @@ type User {
 ```graphql
 {
   "data": {
-      "userList": [
-        {
-          "name": "Jane Dixie",
-          "isAdmin": true
-        },
-        {
-          "name" : "Arnold Anderson",
-          "isAdmin": false
-        }
-      ]
+    "userList": [
+      {
+        "name": "Jane Dixie",
+        "isAdmin": true
+      },
+      {
+        "name": "Arnold Anderson",
+        "isAdmin": false
+      }
+    ]
   }
 }
 ```
@@ -71,16 +71,19 @@ type User {
 ```js
 const Query = {
   searchAdminPosts: (_, args, context, info) => {
-    return context.prisma.query.posts({
-      where: {
-        title_contains: args.title,
-        author: {
-          isAdmin: true
-        }
+    return context.prisma.query.posts(
+      {
+        where: {
+          title_contains: args.title,
+          author: {
+            isAdmin: true,
+          },
+        },
+        orderBy: id_DESC,
       },
-      orderBy: id_DESC
-    }, info)
-  }
+      info
+    )
+  },
 }
 ```
 
@@ -133,14 +136,14 @@ type Post {
 ```graphql
 {
   "data": {
-      "searchAdminPosts": [
-        {
-          "title": "Strategic memo on Content Marketing",
-          "author": {
-            "John Schmidt"
-          }
+    "searchAdminPosts": [
+      {
+        "title": "Strategic memo on Content Marketing",
+        "author": {
+          "name": "John Schmidt"
         }
-      ]
+      }
+    ]
   }
 }
 ```
@@ -150,7 +153,22 @@ type Post {
 ### With Prisma
 
 ```js
-
+const Mutation = {
+  createPost: (_, args, context, info) => {
+    return context.prisma.mutation.craetePost(
+      {
+        data: {
+          title: args.title,
+          author: {
+            connect: { email: args.authorEmail },
+          },
+        },
+        orderBy: id_DESC,
+      },
+      info
+    )
+  },
+}
 ```
 
 ### Without Prisma
@@ -162,18 +180,50 @@ type Post {
 ### Schema
 
 ```graphql
+type Mutation {
+  craetePost: [Post!]!
+}
 
+type User {
+  id: ID!
+  name: String!
+  isAdmin: Boolean
+}
+
+type Post {
+  id: ID! @unique
+  createdAt: DateTime!
+  title: String!
+  author: User!
+}
 ```
 
 ### Query
 
 ```graphql
-
+mutation {
+  createPost(data: {
+    title: "The power of Content Marketing"
+    authorEmail: "marketing@company.com"
+  }) {
+    id
+  }
+}
 ```
 
 ### Response
 
 ```graphql
-
+{
+  "data": {
+    "createPost": [
+      {
+        "id": "cjh0puo0b0000dvpi7b2e87c7",
+        "title": "The power of Content Marketing",
+        "authorEmail": "marketing@company.com"
+      }
+    ]
+  }
+}
 ```
 
