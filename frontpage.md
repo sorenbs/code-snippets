@@ -40,7 +40,7 @@ type User {
 {
   userList {
     name
-    isAfmin
+    isAdmin
   }
 }
 ```
@@ -69,31 +69,80 @@ type User {
 ### With Prisma
 
 ```js
-
+const Query = {
+  searchAdminPosts: (_, args, context, info) => {
+    return context.prisma.query.posts({
+      where: {
+        title_contains: args.title,
+        author: {
+          isAdmin: true
+        }
+      },
+      orderBy: id_DESC
+    }, info)
+  }
+}
 ```
 
 ### Without Prisma
 
 ```js
-
+const Query = {
+  searchAdminPosts: (_, args, context, info) => {
+    return BlackMagic.getPosts()
+  }
+}
 ```
 
 ### Schema
 
 ```graphql
+type Query {
+  searchAdminPosts: [Post!]!
+}
 
+type User {
+  id: ID!
+  name: String!
+  isAdmin: Boolean
+}
+
+type Post {
+  id: ID! @unique
+  createdAt: DateTime!
+  title: String!
+  author: User!
+}
 ```
 
 ### Query
 
 ```graphql
-
+{
+  searchAdminPosts(title: "Content Marketing") {
+    title
+    author: {
+      name
+    }
+  }
+}
 ```
 
 ### Response
 
 ```graphql
-
+{
+  "data": {
+      "searchAdminPosts": [
+        {
+          "title": "Strategic memo on Content Marketing",
+          "author": {
+            "John Schmidt"
+          }
+        }
+      ]
+  }
+}
 ```
 
 # Mutations
