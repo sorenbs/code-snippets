@@ -212,7 +212,7 @@ const Query = {
          "user"."isAdmin"
        FROM tblPosts AS "post"
        LEFT JOIN tblUsers AS "user" ON "user"."id" = "post"."authorId"
-       WHERE "post"."id" = ${postId}
+       WHERE "post"."id" = '${postId}'
     )
   }
 }
